@@ -1,5 +1,6 @@
 package com.vid.envio_correos.models;
 
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,17 +17,17 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Invoice {
+public class Jefe {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate dueDate;
-    private String documentType;
     private String documentNumber;
-    private String name;
-    private String LastName;
-    private String LastName2;
-    private String codJefe;
 
+    private String name;
+
+    private String lastName;
+
+    private String email;
 }

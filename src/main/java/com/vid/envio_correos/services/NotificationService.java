@@ -5,7 +5,6 @@ import com.vid.envio_correos.repositories.InvoiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,18 +20,18 @@ public class NotificationService {
     @Autowired
     private JavaMailSender mailSender;
 
-    private static final String[] NOTIFY_EMAILS = {"camilo_escobar1993@hotmail.com", "camilo04241993@gmail.com"};
+    private static final String[] NOTIFY_EMAILS = {"Urrego.dani@gmail.com", "camilo04241993@gmail.com"};
 
     //@Scheduled(cron = "0 0 9 * * MON") // Ejecutar cada lunes a las 9 AM
-    @Scheduled(cron = "0 */2 * * * *")
+    //@Scheduled(cron = "0 */2 * * * *")
     public void notifyDueInvoices() {
         LocalDate now = LocalDate.now();
-        LocalDate endOfWeek = now.plusDays(7);
+        LocalDate endOfWeek = now.plusDays(30);
 
         List<Invoice> dueInvoices = invoiceRepository.findByDueDateBetween(now, endOfWeek);
         if (!dueInvoices.isEmpty()) {
             String invoiceDetails = dueInvoices.stream()
-                    .map(invoice -> "Factura #" + invoice.getInvoiceNumber() + " - Vence el: " + invoice.getDueDate())
+                    .map(invoice -> "Factura #"  + " - Vence el: " + invoice.getDueDate())
                     .collect(Collectors.joining("\n"));
 
             String subject = "Notificación de facturas por vencer";

@@ -23,14 +23,12 @@ public class Jefe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String documentNumber;
+    private String codJefe;
 
     private String name;
 
     private String lastName;
 
     private String email;
-
-    private String email2;
 
 }

@@ -2,6 +2,7 @@ package com.vid.envio_correos.services;
 
 import com.vid.envio_correos.models.Invoice;
 import com.vid.envio_correos.repositories.InvoiceRepository;
+import com.vid.envio_correos.repositories.JefeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,9 +19,9 @@ public class NotificationService {
     private InvoiceRepository invoiceRepository;
 
     @Autowired
+    private JefeRepository jefeRepository;
+    @Autowired
     private JavaMailSender mailSender;
-
-    private static final String[] NOTIFY_EMAILS = {"Urrego.dani@gmail.com", "camilo04241993@gmail.com"};
 
     //@Scheduled(cron = "0 0 9 * * MON") // Ejecutar cada lunes a las 9 AM
     //@Scheduled(cron = "0 */2 * * * *")
@@ -29,19 +30,40 @@ public class NotificationService {
         LocalDate endOfWeek = now.plusDays(30);
 
         List<Invoice> dueInvoices = invoiceRepository.findByDueDateBetween(now, endOfWeek);
+
+        String emailJefe = "";
+
+        String nameJefe = "";
+
+        String nameEmpleado = "";
+
+        LocalDate date = null;
+
         if (!dueInvoices.isEmpty()) {
-            String invoiceDetails = dueInvoices.stream()
-                    .map(invoice -> "Factura #"  + " - Vence el: " + invoice.getDueDate())
-                    .collect(Collectors.joining("\n"));
+            for (int i = 0; i < dueInvoices.size(); i++) {
 
-            String subject = "Notificación de facturas por vencer";
-            String text = "Las siguientes facturas están por vencer esta semana:\n\n" + invoiceDetails;
+                 nameJefe = jefeRepository
+                        .findByCodJefe(dueInvoices.get(i).getCodJefe()).getName();
+                 emailJefe = jefeRepository
+                        .findByCodJefe(dueInvoices.get(i).getCodJefe()).getEmail();
 
-            sendEmail(NOTIFY_EMAILS, subject, text);
+                 nameEmpleado =  dueInvoices.get(i).getName() + " " +  dueInvoices.get(i).getLastName();
+
+                 date = dueInvoices.get(i).getDueDate();
+
+                String subject = "Notificación de contratos por vencer";
+
+                String text = "Señor " + nameJefe + " El contrato de : " + nameEmpleado + " Vence el " + date ;
+
+
+                sendEmail(emailJefe, subject, text);
+            }
+
+      ;
         }
     }
 
-    private void sendEmail(String[] to, String subject, String text) {
+    private void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);

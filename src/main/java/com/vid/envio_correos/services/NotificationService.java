@@ -7,8 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import java.sql.Date;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,40 +30,42 @@ public class NotificationService {
     //@Scheduled(cron = "0 0 9 * * MON") // Ejecutar cada lunes a las 9 AM
     //@Scheduled(cron = "0 */2 * * * *")
     public void notifyDueInvoices() {
+        // Definir el rango de fechas
         LocalDate now = LocalDate.now();
         LocalDate endOfWeek = now.plusDays(30);
 
-        List<Invoice> dueInvoices = invoiceRepository.findByDueDateBetween(now, endOfWeek);
+        // Obtener todas las facturas en el rango de fechas
+        List<Invoice> dueInvoices = invoiceRepository.findAll();
 
-        String emailJefe = "";
+        LocalDate today = LocalDate.now().plusDays(10);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy");
+        String todayStr = today.format(formatter);
 
-        String nameJefe = "";
+        System.out.println("Fecha actual: " + LocalDate.now()); // Imprimir fecha actual
+        System.out.println("Fecha para consulta: " + todayStr); // Imprimir fecha formateada
 
-        String nameEmpleado = "";
 
-        LocalDate date = null;
+        LocalDate today2 = LocalDate.now();
+        Date sqlDate = Date.valueOf(today);
+
+
+        List<Invoice> dueInvoices0 = invoiceRepository.findByDueDate(sqlDate);
+        List<Invoice> dueInvoices2 = invoiceRepository.findByDueDateAfterOrEqualNative(todayStr);
+        List<Invoice> dueInvoices3 = invoiceRepository.findByDueDateAfterOrEqualFixed();
 
         if (!dueInvoices.isEmpty()) {
-            for (int i = 0; i < dueInvoices.size(); i++) {
-
-                 nameJefe = jefeRepository
-                        .findByCodJefe(dueInvoices.get(i).getCodJefe()).getName();
-                 emailJefe = jefeRepository
-                        .findByCodJefe(dueInvoices.get(i).getCodJefe()).getEmail();
-
-                 nameEmpleado =  dueInvoices.get(i).getName() + " " +  dueInvoices.get(i).getLastName();
-
-                 date = dueInvoices.get(i).getDueDate();
+            for (Invoice invoice : dueInvoices) {
+                String codJefe = invoice.getCodJefe();
+                String nameJefe = jefeRepository.findByCodJefe(codJefe).getName();
+                String emailJefe = jefeRepository.findByCodJefe(codJefe).getEmail();
+                String nameEmpleado = invoice.getName() + " " + invoice.getLastName();
+                java.util.Date date = invoice.getDueDate();
 
                 String subject = "Notificación de contratos por vencer";
-
-                String text = "Señor " + nameJefe + " El contrato de : " + nameEmpleado + " Vence el " + date ;
-
+                String text = "Señor " + nameJefe + ", el contrato de: " + nameEmpleado + " vence el " + date;
 
                 sendEmail(emailJefe, subject, text);
             }
-
-      ;
         }
     }
 
